@@ -1,5 +1,6 @@
 package com.MangementApplication.controller;
 
+import com.MangementApplication.entity.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import com.MangementApplication.service.BatchService;
 import com.MangementApplication.service.ProductService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -31,21 +33,29 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<Object> getAllProducts() {
-        return ResponseEntity.ok(createResponseMessage("success/failure", "Placeholde for logic of retrival of all product data from product table"));
-
-
+        List<Product> products = productService.getAllProducts();
+        return ResponseEntity.ok(products);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getProductById(@PathVariable Long id) {
-        return ResponseEntity.ok(createResponseMessage("success/failure", "Placeholde for logic of retrival of  product using its id from product table"));
-
+        try{
+            Product product = productService.findById(id);
+            return ResponseEntity.ok(product);
+        } catch (Exception e){
+            return ResponseEntity.ok(createResponseMessage("failure", e.getMessage()));
+        }
     }
 
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> addProduct(@RequestBody ProductRequestDTO requestDTO) {
-        return ResponseEntity.ok(createResponseMessage("success/failure", "Placeholde for logic of addition of product"));
-
+        Product product = Product.builder().name(requestDTO.getName()).price(requestDTO.getPrice()).build();
+        try {
+            Product savedproduct = productService.saveProduct(product);
+            return ResponseEntity.ok(createResponseMessage("success", "Product added successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.ok(createResponseMessage("failure", e.getMessage()));
+        }
     }
 
     @PostMapping("/batch/add/{product_id}")
